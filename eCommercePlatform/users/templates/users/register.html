@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register a New User
+{% endblock %}
+
+{% block content %}
+    <h1>Register a New User</h1>
+    <form action="/users/register/" method="post">
+        {% csrf_token %} <!--Cross Site Request Forgery => ensures that the form is being sumitted from our site and not from something pretending to be our site-->
+        {{ form }}
+        <button class="form-submit">Submit</button>
+    </form>
+{% endblock %}
