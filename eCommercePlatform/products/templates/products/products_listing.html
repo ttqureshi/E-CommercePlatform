@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+    {% block title %}
+    Products Listing
+    {% endblock %}
+
+    {% block content %}
+        {% for product in products %}
+            <section>
+                <img 
+                    class="banner"
+                    src="{{ product.image.url }}" 
+                    alt="{{ product.name }}
+                ">
+                <h1>{{ product.name}}</h1>
+                <p>{{ product.price }}</p>
+                <hr>
+            </section>
+        {% endfor %}
+    {% endblock %}
