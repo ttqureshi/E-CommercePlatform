@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Register a New User
+    User Login
 {% endblock %}
 
 {% block content %}
-    <h1>Register a New User</h1>
-    <form action="{% url "users:register" %}" method="post">
+    <h1>User Login</h1>
+    <form action="{% url "users:login" %}" method="post">
         {% csrf_token %} <!--Cross Site Request Forgery => ensures that the form is being sumitted from our site and not from something pretending to be our site-->
         {{ form }}
         <button class="form-submit">Submit</button>
