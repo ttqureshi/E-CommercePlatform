@@ -1,6 +1,5 @@
 .DS_Store
 eCommercePlatform.pdf
 django-env
-eCommercePlatform/users/__pycache__
-eCommercePlatform/products/__pycache__
-eCommercePlatform/__pycache__
+*.pyc
+__pycache__/
