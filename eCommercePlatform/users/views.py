@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import reverse
 from .forms import UserRegisterForm
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 
 # Create your views here.
 
@@ -25,3 +25,9 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     return render(request, 'users/login.html', {"form": form})
+
+def logout_view(request):
+    if request.method == 'POST':
+        logout(request)
+        redirect("products:products-listing")
+        

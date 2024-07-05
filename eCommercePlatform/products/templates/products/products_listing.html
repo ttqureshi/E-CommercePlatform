@@ -1,23 +1,33 @@
 {% extends "layout.html" %}
+{% load bootstrap5 %}
+
 {% block title %}
 Products Listing
 {% endblock %}
 
 {% block content %}
-    {% for product in products %}
-        <section>
-            <a href="{% url 'products:detail' product.id %}">
-                <img 
-                    class="banner"
-                    src="{{ product.image.url }}" 
-                    alt="{{ product.name }}"
-                >
-            </a>
-            <a href="{% url 'products:detail' product.id %}">
-                <h1>{{ product.name}}</h1>
-            </a>
-            <p>{{ product.price }}</p>
-            <hr>
-        </section>
-    {% endfor %}
+<div class="container">
+    <div class="row">
+        {% for product in products %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <a href="{% url 'products:detail' product.id %}">
+                    <img 
+                        class="card-img-top"
+                        src="{{ product.image.url }}" 
+                        alt="{{ product.name }}"
+                        style="height: 300px; object-fit: cover;"
+                    >
+                </a>
+                <div class="card-body">
+                    <a href="{% url 'products:detail' product.id %}">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                    </a>
+                    <p class="card-text">Rs. {{ product.price }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}
