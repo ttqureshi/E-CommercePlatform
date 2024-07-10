@@ -1,8 +1,14 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import reverse
-from .forms import UserRegisterForm
 from django.contrib.auth import login, logout
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.views import generic
+
+from .forms import UserRegisterForm
+from products.models import Product
+from .models import Cart, CartItem
 
 # Create your views here.
 
@@ -12,6 +18,8 @@ def register_view(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             login(request, form.save())
+            cart = Cart(user=request.user)
+            cart.save()
             return redirect("products:products-listing")
     else:
         form = UserRegisterForm()
@@ -33,3 +41,29 @@ def logout_view(request):
     if request.method == "POST":
         logout(request)
         redirect("products:products-listing")
+
+@login_required(login_url="/login")
+def cart_view(request):
+    cart = Cart.objects.get(user=request.user)
+    items = cart.cartitem_set.all()
+    total_price = sum(item.quantity * item.product.price for item in items)
+
+    return render(request, 'users/cart.html', {"cart": cart, "total_price": total_price})
+
+
+@login_required(login_url="/login")
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    in_stock = product.stock > 0
+
+    if in_stock:
+        cart = Cart.objects.get(user=request.user)
+        cart_item, is_created = CartItem.objects.get_or_create(cart=cart, product=product)
+
+        if not is_created:
+            cart_item.quantity += 1
+            cart_item.save()
+        else:
+            cart_item.quantity = 1
+    
+    return redirect("users:cart")
