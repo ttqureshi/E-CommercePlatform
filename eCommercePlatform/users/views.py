@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.contrib.auth import login, logout
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.views import generic
+from django.contrib import messages
 
 from .forms import UserRegisterForm
 from products.models import Product
@@ -67,3 +67,29 @@ def add_to_cart(request, product_id):
             cart_item.quantity = 1
     
     return redirect("users:cart")
+
+
+@login_required(login_url="/login")
+def update_cart_item(request, product_id):
+    if request.method == "POST":
+        cart = Cart.objects.get(user=request.user)
+        cart_item = cart.cartitem_set.get(product_id=product_id)
+        product = Product.objects.get(id=product_id)
+        stock_left = product.stock
+        quantity = int(request.POST.get('quantity'))
+        if quantity <= stock_left:
+            cart_item.quantity = quantity
+            cart_item.save()
+        else:
+            messages.warning(request, f"Only {stock_left} {product.name} left in stock.")
+        return redirect("users:cart")
+    return redirect("users:cart")
+
+
+@login_required(login_url="/login")
+def remove_item(request, product_id):
+    if request.method == "POST":
+        cart = Cart.objects.get(user=request.user)
+        cart_item = cart.cartitem_set.get(product_id=product_id)
+        cart_item.delete()
+        return redirect("users:cart")

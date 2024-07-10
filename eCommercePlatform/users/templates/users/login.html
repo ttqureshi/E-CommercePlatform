@@ -13,5 +13,8 @@
         {% buttons %}
             <button type="submit" class="btn btn-primary">Submit</button>
         {% endbuttons %}
+        <p>
+            New User? <a href="{% url "users:register" %}">Register</a>
+        </p>
     </form>
 {% endblock %}
