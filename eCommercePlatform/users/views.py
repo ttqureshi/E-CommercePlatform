@@ -2,13 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
 from django.urls import reverse
 from django.contrib.auth import login, logout
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .forms import UserRegisterForm
+from .forms import UserRegisterForm, OrderForm
 from products.models import Product
-from .models import Cart, CartItem
+from .models import Cart, CartItem, Order, OrderItem
 
 # Create your views here.
 
@@ -66,7 +65,7 @@ def add_to_cart(request, product_id):
         else:
             cart_item.quantity = 1
     
-    return redirect("users:cart")
+    return redirect("products:products-listing")
 
 
 @login_required(login_url="/login")
@@ -93,3 +92,39 @@ def remove_item(request, product_id):
         cart_item = cart.cartitem_set.get(product_id=product_id)
         cart_item.delete()
         return redirect("users:cart")
+
+
+@login_required(login_url="/login")
+def checkout(request):
+    cart = get_object_or_404(Cart, user=request.user)
+    items = cart.cartitem_set.all()
+    total_price = sum(item.quantity * item.product.price for item in items)
+
+    if request.method == "POST":
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.user = request.user 
+            order.total_price = total_price
+            order.save()
+
+            for cart_item in cart.cartitem_set.all():
+                OrderItem.objects.create(
+                    order=order,
+                    product=cart_item.product,
+                    quantity=cart_item.quantity
+                )
+                product = Product.objects.get(id=cart_item.product.id)
+                product.stock -= cart_item.quantity
+                product.save()
+            
+            cart.cartitem_set.all().delete()
+
+            return render(request, "users/order_confirmation.html", {"order": order})
+    else:
+        form = OrderForm()
+    return render(request, "users/checkout.html", {
+        "form": form,
+        "cart": cart,
+        "total_price": total_price
+    })
