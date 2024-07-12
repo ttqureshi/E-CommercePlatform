@@ -43,6 +43,7 @@
         </tbody>
     </table>
     <h4>Total: Rs. {{ order.total_price }}</h4>
-    <a class="btn btn-primary mt-3">View Order History</a>
+    <a href="{% url "users:orders" %}" class="btn btn-primary mt-3">View Order History</a>
+    <br><br><br>
 </div>
 {% endblock %}

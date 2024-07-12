@@ -33,11 +33,19 @@ Checkout
     <br><hr><br>
 
     <h2>Checkout</h2>
-    <form action="{% url "users:checkout" %}" method="post">
-        {% csrf_token %}
-        {% bootstrap_form form %}
-        <button type="submit" class="btn btn-success">Place Order</button>
-    </form>
+    {% if total_price != 0 %}
+        <form action="{% url "users:checkout" %}" method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button type="submit" class="btn btn-success">Place Order</button>
+        </form>
+    {% else %}
+        <form action="{% url "users:checkout" %}" method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button type="submit" class="btn btn-success disabled">Place Order</button>
+        </form>
+    {% endif %}
     <br><br><br>
 </div>
 {% endblock %}

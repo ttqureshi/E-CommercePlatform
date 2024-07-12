@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm
-from django.urls import reverse
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -8,8 +7,6 @@ from django.contrib import messages
 from .forms import UserRegisterForm, OrderForm
 from products.models import Product
 from .models import Cart, CartItem, Order, OrderItem
-
-# Create your views here.
 
 
 def register_view(request):
@@ -128,3 +125,15 @@ def checkout(request):
         "cart": cart,
         "total_price": total_price
     })
+
+
+@login_required(login_url="/login")
+def orders(request):
+    orders = Order.objects.filter(user=request.user)
+    return render(request, "users/order_history.html", {"orders": orders})
+
+
+@login_required(login_url="/login")
+def order_detail(request, order_id):
+    order = Order.objects.get(id=order_id)
+    return render(request, "users/order_detail.html", {"order": order})
