@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
 
-from .forms import UserRegisterForm, OrderForm
+from .forms import UserRegisterForm, OrderForm, UserUpdateForm
 from products.models import Product
 from .models import Cart, CartItem, Order, OrderItem
 
@@ -37,6 +38,37 @@ def logout_view(request):
     if request.method == "POST":
         logout(request)
         redirect("products:products-listing")
+
+
+@login_required(login_url="/login")
+def profile(request):
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        password_form = PasswordChangeForm(user=request.user, data=request.POST)
+
+        if user_form.is_valid() and password_form.is_valid():
+            user_form.save()
+            user = password_form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your profile has been updated successfully.')
+            return redirect('users:profile')
+        else:
+            error_message = 'Password change unsuccessful. Please correct the errors below.'
+            if 'password_form' in locals() and password_form.errors:
+                error_message += f' Reason: {", ".join([", ".join(errors) for errors in password_form.errors.values()])}'
+            messages.error(request, error_message)
+
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        password_form = PasswordChangeForm(request.user)
+
+    context = {
+        'user_form': user_form,
+        'password_form': password_form
+    }
+
+    return render(request, 'users/user_profile.html', context)
+
 
 @login_required(login_url="/login")
 def cart_view(request):
