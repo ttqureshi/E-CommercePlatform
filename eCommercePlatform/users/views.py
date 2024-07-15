@@ -42,7 +42,7 @@ def logout_view(request):
 
 @login_required(login_url="/login")
 def profile(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         user_form = UserUpdateForm(request.POST, instance=request.user)
         password_form = PasswordChangeForm(user=request.user, data=request.POST)
 
@@ -50,11 +50,13 @@ def profile(request):
             user_form.save()
             user = password_form.save()
             update_session_auth_hash(request, user)
-            messages.success(request, 'Your profile has been updated successfully.')
-            return redirect('users:profile')
+            messages.success(request, "Your profile has been updated successfully.")
+            return redirect("users:profile")
         else:
-            error_message = 'Password change unsuccessful. Please correct the errors below.'
-            if 'password_form' in locals() and password_form.errors:
+            error_message = (
+                "Password change unsuccessful. Please correct the errors below."
+            )
+            if "password_form" in locals() and password_form.errors:
                 error_message += f' Reason: {", ".join([", ".join(errors) for errors in password_form.errors.values()])}'
             messages.error(request, error_message)
 
@@ -62,12 +64,9 @@ def profile(request):
         user_form = UserUpdateForm(instance=request.user)
         password_form = PasswordChangeForm(request.user)
 
-    context = {
-        'user_form': user_form,
-        'password_form': password_form
-    }
+    context = {"user_form": user_form, "password_form": password_form}
 
-    return render(request, 'users/user_profile.html', context)
+    return render(request, "users/user_profile.html", context)
 
 
 @login_required(login_url="/login")
@@ -76,7 +75,9 @@ def cart_view(request):
     items = cart.cartitem_set.all()
     total_price = sum(item.quantity * item.product.price for item in items)
 
-    return render(request, 'users/cart.html', {"cart": cart, "total_price": total_price})
+    return render(
+        request, "users/cart.html", {"cart": cart, "total_price": total_price}
+    )
 
 
 @login_required(login_url="/login")
@@ -86,14 +87,16 @@ def add_to_cart(request, product_id):
 
     if in_stock:
         cart = Cart.objects.get(user=request.user)
-        cart_item, is_created = CartItem.objects.get_or_create(cart=cart, product=product)
+        cart_item, is_created = CartItem.objects.get_or_create(
+            cart=cart, product=product
+        )
 
         if not is_created:
             cart_item.quantity += 1
             cart_item.save()
         else:
             cart_item.quantity = 1
-    
+
     return redirect("products:products-listing")
 
 
@@ -104,12 +107,14 @@ def update_cart_item(request, product_id):
         cart_item = cart.cartitem_set.get(product_id=product_id)
         product = Product.objects.get(id=product_id)
         stock_left = product.stock
-        quantity = int(request.POST.get('quantity'))
+        quantity = int(request.POST.get("quantity"))
         if quantity <= stock_left:
             cart_item.quantity = quantity
             cart_item.save()
         else:
-            messages.warning(request, f"Only {stock_left} {product.name} left in stock.")
+            messages.warning(
+                request, f"Only {stock_left} {product.name} left in stock."
+            )
         return redirect("users:cart")
     return redirect("users:cart")
 
@@ -133,30 +138,28 @@ def checkout(request):
         form = OrderForm(request.POST)
         if form.is_valid():
             order = form.save(commit=False)
-            order.user = request.user 
+            order.user = request.user
             order.total_price = total_price
             order.save()
 
             for cart_item in cart.cartitem_set.all():
                 OrderItem.objects.create(
-                    order=order,
-                    product=cart_item.product,
-                    quantity=cart_item.quantity
+                    order=order, product=cart_item.product, quantity=cart_item.quantity
                 )
                 product = Product.objects.get(id=cart_item.product.id)
                 product.stock -= cart_item.quantity
                 product.save()
-            
+
             cart.cartitem_set.all().delete()
 
             return render(request, "users/order_confirmation.html", {"order": order})
     else:
         form = OrderForm()
-    return render(request, "users/checkout.html", {
-        "form": form,
-        "cart": cart,
-        "total_price": total_price
-    })
+    return render(
+        request,
+        "users/checkout.html",
+        {"form": form, "cart": cart, "total_price": total_price},
+    )
 
 
 @login_required(login_url="/login")

@@ -4,9 +4,11 @@ from django.utils import timezone
 
 from products.models import Product
 
+
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    items = models.ManyToManyField(Product, through='CartItem')
+    items = models.ManyToManyField(Product, through="CartItem")
+
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
@@ -16,7 +18,8 @@ class CartItem(models.Model):
     @property
     def total_price(self):
         return self.quantity * self.product.price
-    
+
+
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True)
@@ -31,6 +34,7 @@ class Order(models.Model):
     def __str__(self):
         return f"Order {self.id} by {self.user.username} placed on {self.order_date}"
 
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -39,6 +43,6 @@ class OrderItem(models.Model):
     @property
     def total_price(self):
         return self.quantity * self.product.price
-    
+
     def __str__(self):
         return f"{self.quantity} x {self.product} (Order: {self.order.id})"

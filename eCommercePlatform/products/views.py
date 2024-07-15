@@ -4,14 +4,14 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def products_listing_view(request):
-    category = request.GET.get('category')
+    category = request.GET.get("category")
     if category:
         products = Product.objects.filter(category__name=category)
     else:
         products = Product.objects.all()
-    
+
     p = Paginator(products, 6)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
     try:
         page_obj = p.get_page(page_number)
     except PageNotAnInteger:
@@ -19,7 +19,11 @@ def products_listing_view(request):
     except EmptyPage:
         page_obj = p.page(p.num_pages)
 
-    return render(request, "products/products_listing.html", {"page_obj": page_obj, "selected_category": category})
+    return render(
+        request,
+        "products/products_listing.html",
+        {"page_obj": page_obj, "selected_category": category},
+    )
 
 
 def product_detail_view(request, product_id):
