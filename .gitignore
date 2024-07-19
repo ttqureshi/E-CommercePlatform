@@ -1,3 +1,5 @@
 .DS_Store
 eCommercePlatform.pdf
 django-env
+*.pyc
+__pycache__/
